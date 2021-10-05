@@ -1,0 +1,7 @@
+python=3.8
+fire
+biopython
+sra-tools=2.11
+samtools
+varscan
+pyvcf

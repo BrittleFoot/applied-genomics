@@ -17,7 +17,6 @@ from sweets import BColors, sweet_logging
 from sweets import run
 from sweets import parse_vcf
 from sweets import analyze_variant
-from sweets import log_analysis
 from sweets import colorize
 
 from pathlib import Path
@@ -65,10 +64,10 @@ def varscan(reference, bam, output, *, freq=0.95, depth=16000):
 
 class Main:
 
-    def prepare(self):
-        align(...)
-
     REFERENCE = Path('data') / 'InfluenzaGene.fa'
+
+    def _aling_(self, reads, out):
+        return align(Main.REFERENCE, reads, out)
 
     def _varskan_(self, *, freq, depth):
         return varscan(
@@ -83,6 +82,22 @@ class Main:
         self.results = base_dir
         self.alignment = base_dir / 'alignment.sorted.bam'
         self.variants = base_dir / 'variants.vcf'
+        return self.alignment, self.variants
+
+    def prepare(self, patient, control_dir):
+        patient = Path(patient)
+        control_dir = Path(control_dir)
+
+        respath = Path('results')
+        alignment, _ = self._build_dirs(respath)
+        self._aling_(patient, alignment)
+
+        for srr_path in control_dir.iterdir():
+            out_dir = respath / 'control' / srr_path.stem
+            out_dir.mkdir(exist_ok=True, parents=True)
+            out_alignment = out_dir / alignment.name
+
+            self._aling_(srr_path, out_alignment)
 
     def experiment(self, base_dir, *, freq=0.001, depth=50000):
         base_dir = Path(base_dir)
